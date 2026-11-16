@@ -1,29 +1,1196 @@
 ---
 title: "Rice Drought Stress Analysis"
-output: html_document
-date: "2026-11-14"
+subtitle: "Uncovering the Molecular Response of Rice to Drought Stress Using Differential Gene Expression Analysis"
+author: "Ayodya Ekanayake"
+date: "`r format(Sys.Date(), '%d %B %Y')`"
+output:
+  html_document:
+    toc: false
+    number_sections: false
+    self_contained: true
 ---
 
+<style>
+
+/* =====================================================================
+   DESIGN TOKENS  (navy / white / soft grey)
+===================================================================== */
+:root {
+  --navy-900: #14213a;
+  --navy-800: #1b2c4b;
+  --navy-700: #26405f;
+  --navy-500: #46688f;
+  --navy-300: #8ea6c3;
+  --navy-100: #e6ecf4;
+  --grey-50:  #f6f8fb;
+  --grey-100: #eef1f6;
+  --grey-200: #dfe5ee;
+  --grey-500: #6b778a;
+  --text:     #243142;
+  --up:       #b4443f;
+  --down:     #2f5d8a;
+  --white:    #ffffff;
+}
+
+/* =====================================================================
+   BASE
+===================================================================== */
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  background: var(--grey-100);
+  color: var(--text);
+  font-size: 15.5px;
+  line-height: 1.75;
+}
+
+.main-container {
+  max-width: 1120px !important;
+  margin: 0 auto !important;
+  padding: 28px 30px 70px !important;
+}
+
+p { margin: 0 0 14px; }
+
+/* hide the default R Markdown title block (the hero replaces it) */
+.title, .subtitle, .author, .date { display: none; }
+h1.title { display: none; }
+
+/* =====================================================================
+   HERO / COVER
+===================================================================== */
+.hero {
+  background: linear-gradient(135deg, var(--navy-900) 0%, var(--navy-700) 100%);
+  color: var(--white);
+  border-radius: 18px;
+  padding: 58px 54px 46px;
+  margin: 8px 0 28px;
+  box-shadow: 0 14px 34px rgba(20, 33, 58, 0.28);
+}
+
+.hero .eyebrow {
+  display: inline-block;
+  font-size: 12.5px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--navy-300);
+  border: 1px solid rgba(142, 166, 195, 0.55);
+  padding: 5px 14px;
+  border-radius: 30px;
+  margin-bottom: 22px;
+}
+
+.hero h1.hero-title {
+  font-size: 40px;
+  line-height: 1.2;
+  font-weight: 700;
+  margin: 0 0 14px;
+  color: var(--white);
+  border: none;
+  padding: 0;
+}
+
+.hero .hero-sub {
+  font-size: 18px;
+  line-height: 1.55;
+  color: #cfd9e8;
+  max-width: 820px;
+  margin-bottom: 34px;
+}
+
+.hero-meta {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.18);
+  padding-top: 24px;
+}
+
+.hero-meta .label {
+  font-size: 11.5px;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: var(--navy-300);
+}
+
+.hero-meta .value {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--white);
+  line-height: 1.4;
+}
+
+/* =====================================================================
+   SECTION HEADINGS
+===================================================================== */
+h2 {
+  font-size: 27px;
+  font-weight: 700;
+  color: var(--navy-800);
+  margin: 54px 0 18px;
+  padding-bottom: 10px;
+  border-bottom: 3px solid var(--navy-800);
+}
+
+h2::before {
+  content: "";
+  display: inline-block;
+  width: 10px;
+  height: 24px;
+  background: var(--navy-500);
+  border-radius: 3px;
+  margin-right: 12px;
+  vertical-align: -3px;
+}
+
+h3 {
+  font-size: 19px;
+  font-weight: 650;
+  color: var(--navy-700);
+  margin: 32px 0 12px;
+}
+
+h4 {
+  font-size: 16px;
+  font-weight: 650;
+  color: var(--navy-700);
+  margin: 22px 0 8px;
+}
+
+/* =====================================================================
+   PANELS, CARDS, CALLOUTS
+===================================================================== */
+.panel {
+  background: var(--white);
+  border: 1px solid var(--grey-200);
+  border-radius: 14px;
+  padding: 26px 30px;
+  margin: 18px 0 24px;
+  box-shadow: 0 2px 10px rgba(20, 33, 58, 0.05);
+}
+
+.panel > :last-child { margin-bottom: 0; }
+
+.panel-title {
+  font-size: 12.5px;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: var(--navy-500);
+  font-weight: 700;
+  margin-bottom: 14px;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin: 18px 0 24px;
+}
+
+.card {
+  background: var(--white);
+  border: 1px solid var(--grey-200);
+  border-top: 4px solid var(--navy-700);
+  border-radius: 12px;
+  padding: 18px 20px;
+  box-shadow: 0 2px 10px rgba(20, 33, 58, 0.05);
+}
+
+.card.up   { border-top-color: var(--up); }
+.card.down { border-top-color: var(--down); }
+
+.card .num {
+  font-size: 30px;
+  font-weight: 700;
+  color: var(--navy-800);
+  line-height: 1.15;
+}
+
+.card .lab {
+  font-size: 12.5px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--grey-500);
+  margin-top: 4px;
+}
+
+.card .sub {
+  font-size: 13.5px;
+  color: var(--text);
+  margin-top: 8px;
+  line-height: 1.5;
+}
+
+.fact-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0 40px;
+}
+
+.fact {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--grey-200);
+  font-size: 14.5px;
+}
+
+.fact .k { color: var(--grey-500); }
+.fact .v { font-weight: 600; text-align: right; color: var(--navy-800); }
+
+.callout {
+  background: var(--navy-100);
+  border-left: 5px solid var(--navy-700);
+  border-radius: 8px;
+  padding: 16px 22px;
+  margin: 20px 0;
+}
+
+.callout > :last-child { margin-bottom: 0; }
+.callout strong.t { color: var(--navy-800); }
+
+.callout.warn {
+  background: #fbf3e4;
+  border-left-color: #c58a1b;
+}
+
+.note-box {
+  background: #fbf3e4;
+  border: 1px dashed #c58a1b;
+  border-radius: 8px;
+  padding: 14px 18px;
+  font-size: 14px;
+  margin: 14px 0;
+}
+
+/* =====================================================================
+   TABLE OF CONTENTS (dedicated panel)
+===================================================================== */
+.toc-panel {
+  background: var(--white);
+  border: 1px solid var(--grey-200);
+  border-radius: 14px;
+  padding: 30px 34px 26px;
+  margin: 34px 0 10px;
+  box-shadow: 0 2px 10px rgba(20, 33, 58, 0.05);
+}
+
+.toc-panel h2 {
+  margin-top: 0;
+  font-size: 24px;
+}
+
+.toc-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  columns: 2;
+  column-gap: 44px;
+}
+
+.toc-list li {
+  break-inside: avoid;
+  margin: 0;
+  padding: 9px 0;
+  border-bottom: 1px dotted var(--grey-200);
+}
+
+.toc-list a {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  color: var(--navy-800);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.toc-list a:hover { color: var(--navy-500); }
+
+.toc-list .n {
+  display: inline-block;
+  min-width: 30px;
+  color: var(--navy-500);
+  font-weight: 700;
+}
+
+.toc-list .d {
+  display: block;
+  font-weight: 400;
+  font-size: 12.5px;
+  color: var(--grey-500);
+}
+
+/* =====================================================================
+   WORKFLOW STEPS
+===================================================================== */
+.workflow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin: 18px 0 26px;
+  counter-reset: step;
+}
+
+.step {
+  background: var(--white);
+  border: 1px solid var(--grey-200);
+  border-radius: 12px;
+  padding: 16px 18px;
+  counter-increment: step;
+  position: relative;
+}
+
+.step::before {
+  content: counter(step);
+  display: inline-flex;
+  width: 26px;
+  height: 26px;
+  align-items: center;
+  justify-content: center;
+  background: var(--navy-700);
+  color: var(--white);
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: 50%;
+  margin-bottom: 8px;
+}
+
+.step .st { font-weight: 650; color: var(--navy-800); font-size: 14.5px; line-height: 1.35; }
+.step .sd { font-size: 13px; color: var(--grey-500); line-height: 1.5; margin-top: 4px; }
+
+/* =====================================================================
+   TABLES
+===================================================================== */
+.table-wrap {
+  overflow-x: auto;
+  margin: 14px 0 22px;
+  border: 1px solid var(--grey-200);
+  border-radius: 10px;
+  background: var(--white);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  margin: 0;
+}
+
+.main-container > table, .panel > table, .callout > table {
+  margin: 14px 0 22px;
+  border: 1px solid var(--grey-200);
+  background: var(--white);
+}
+
+table thead th {
+  background: var(--navy-800);
+  color: var(--white);
+  font-weight: 600;
+  text-align: left;
+  padding: 11px 14px;
+  font-size: 13px;
+  letter-spacing: 0.3px;
+  border-bottom: none;
+  white-space: nowrap;
+}
+
+table tbody td {
+  padding: 9px 14px;
+  border-top: 1px solid var(--grey-200);
+  vertical-align: top;
+}
+
+table tbody tr:nth-child(even) td { background: var(--grey-50); }
+table tbody tr:hover td { background: var(--navy-100); }
+
+/* =====================================================================
+   FIGURES
+===================================================================== */
+.figure-panel {
+  background: var(--white);
+  border: 1px solid var(--grey-200);
+  border-radius: 14px;
+  padding: 18px 18px 14px;
+  margin: 20px 0 26px;
+  text-align: center;
+  box-shadow: 0 2px 10px rgba(20, 33, 58, 0.05);
+}
+
+.figure-panel img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+}
+
+.figure-panel figcaption {
+  font-size: 13.5px;
+  color: var(--grey-500);
+  margin-top: 10px;
+  line-height: 1.5;
+}
+
+.figure-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px;
+}
+
+/* =====================================================================
+   MISC
+===================================================================== */
+.pill {
+  display: inline-block;
+  padding: 2px 11px;
+  border-radius: 20px;
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.pill.up   { background: #f7e3e2; color: var(--up); }
+.pill.down { background: #dfe9f4; color: var(--down); }
+
+code {
+  background: var(--grey-100);
+  color: var(--navy-800);
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-size: 13.5px;
+}
+
+.reference-list p {
+  padding-left: 26px;
+  text-indent: -26px;
+  font-size: 14.5px;
+  margin-bottom: 11px;
+}
+
+.footer {
+  margin-top: 60px;
+  padding: 26px 30px;
+  background: var(--navy-900);
+  color: #c4d0e2;
+  border-radius: 14px;
+  font-size: 13.5px;
+  text-align: center;
+  line-height: 1.7;
+}
+
+.footer strong { color: var(--white); }
+
+/* =====================================================================
+   RESPONSIVE + PRINT
+===================================================================== */
+@media (max-width: 900px) {
+  .card-grid, .workflow, .hero-meta { grid-template-columns: repeat(2, 1fr); }
+  .fact-grid, .figure-row { grid-template-columns: 1fr; }
+  .toc-list { columns: 1; }
+  .hero { padding: 38px 26px; }
+  .hero h1.hero-title { font-size: 30px; }
+}
+
+@media (max-width: 560px) {
+  .card-grid, .workflow, .hero-meta { grid-template-columns: 1fr; }
+  .main-container { padding: 16px 14px 50px !important; }
+}
+
+@media print {
+  body { background: #ffffff; }
+  .hero, .footer { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .panel, .card, .figure-panel, .step { box-shadow: none; break-inside: avoid; }
+  h2 { break-after: avoid; }
+}
+
+</style>
+
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+
+knitr::opts_chunk$set(
+  echo = FALSE,
+  warning = FALSE,
+  message = FALSE,
+  comment = NA
+)
+
+# Use the project package library if it exists (same one as analysis.R)
+if (dir.exists("D:/RLanguage/R_Packages")) {
+  .libPaths(c("D:/RLanguage/R_Packages", .libPaths()))
+}
+
+# ---- Locate the project root (works when knitting from reports/ or from the root) ----
+root <- if (dir.exists("results")) {
+  "."
+} else if (dir.exists("../results")) {
+  ".."
+} else {
+  stop("Could not find the 'results' folder. Keep final_report.Rmd inside the 'reports' folder of the project.")
+}
+
+p <- function(...) file.path(root, ...)
+
+# ---- Small helpers ----
+fmt     <- function(x) formatC(x, format = "d", big.mark = ",")
+pct     <- function(x, d = 1) sprintf(paste0("%.", d, "f%%"), x)
+fmt_sci <- function(x) formatC(x, format = "e", digits = 2)
+
+# Show a table as styled HTML
+html_table <- function(df) {
+  out <- knitr::kable(
+    df,
+    format = "html",
+    row.names = FALSE,
+    table.attr = 'class="data-table"'
+  )
+  cat('<div class="table-wrap">\n', paste(out, collapse = "\n"), '\n</div>\n', sep = "")
+}
+
+# Show a saved figure (embedded in the HTML so the report is one self-contained file)
+show_fig <- function(file, caption) {
+  path <- p("figures", file)
+  if (file.exists(path)) {
+    cat(sprintf(
+      '<figure class="figure-panel"><img src="%s" alt="%s"><figcaption>%s</figcaption></figure>\n',
+      knitr::image_uri(path), caption, caption
+    ))
+  } else {
+    cat(sprintf(
+      '<div class="note-box"><strong>Figure not found:</strong> <code>figures/%s</code>. Run <code>analysis.R</code> first, then knit this report again.</div>\n',
+      file
+    ))
+  }
+}
 ```
 
-## R Markdown
+```{r load-data, include=FALSE}
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+# Read a results CSV (row-name column of limma tables is renamed to ProbeID)
+read_res <- function(f) {
+  x <- read.csv(p("results", f), check.names = FALSE, stringsAsFactors = FALSE)
+  if (names(x)[1] %in% c("", "X")) names(x)[1] <- "ProbeID"
+  x
+}
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+all_de <- read_res("all_differential_expression.csv")
+sig    <- read_res("significant_probes.csv")
+up     <- read_res("upregulated_probes.csv")
+down   <- read_res("downregulated_probes.csv")
+ann    <- read_res("annotated_results.csv")
 
-```{r cars}
-summary(cars)
+expr <- read.csv(p("results", "clean_expression_matrix.csv"),
+                 check.names = FALSE, row.names = 1)
+
+meta <- read.csv(p("results", "sample_metadata.csv"),
+                 check.names = FALSE, stringsAsFactors = FALSE)
+
+# ---- Key numbers (all taken directly from the result files) ----
+n_orig    <- 45151L                      # probes on the GEO series matrix (GPL6864)
+n_tested  <- nrow(all_de)                # probes analysed by limma
+n_removed <- n_orig - n_tested           # zero-variance / invalid probes removed
+n_samples <- ncol(expr)
+n_ctrl    <- sum(meta$condition == "Control")
+n_drought <- sum(meta$condition == "Drought")
+
+n_fdr  <- sum(all_de$`adj.P.Val` < 0.05, na.rm = TRUE)
+n_sig  <- nrow(sig)
+n_up   <- nrow(up)
+n_down <- nrow(down)
+n_lfc2 <- sum(abs(sig$logFC) >= 2)
+n_lfc3 <- sum(abs(sig$logFC) >= 3)
+
+pct_sig  <- 100 * n_sig  / n_tested
+pct_up   <- 100 * n_up   / n_sig
+pct_down <- 100 * n_down / n_sig
+pct_fdr  <- 100 * n_fdr  / n_tested
+
+max_up   <- max(sig$logFC)
+max_down <- min(sig$logFC)
+
+# ---- Annotated, ordered tables ----
+ann$Locus <- sub("\\|.*$", "", ann$Accessions)
+ann$Annotation <- ifelse(is.na(ann$Description) | ann$Description == "", "-", ann$Description)
+
+ann_sig  <- ann[order(ann$`P.Value`), ]
+ann_up   <- ann[ann$logFC > 0, ]
+ann_up   <- ann_up[order(-ann_up$logFC), ]
+ann_down <- ann[ann$logFC < 0, ]
+ann_down <- ann_down[order(ann_down$logFC), ]
+
+make_top <- function(d, n = 10) {
+  d <- head(d, n)
+  data.frame(
+    Probe      = d$ProbeID,
+    Locus      = d$Locus,
+    `log2FC`   = round(d$logFC, 2),
+    `Adj. P`   = fmt_sci(d$`adj.P.Val`),
+    Annotation = d$Annotation,
+    check.names = FALSE,
+    stringsAsFactors = FALSE
+  )
+}
+
+n_unknown <- sum(grepl("hypothetical|unknown function|unknown protein|uncharacteri",
+                       ann$Description, ignore.case = TRUE))
+pct_unknown <- 100 * n_unknown / nrow(ann)
+
+# ---- Annotation-keyword themes among significant probes ----
+themes <- data.frame(
+  Key     = c("hsp", "lea", "dehy", "aqp", "perox", "chloro", "chit", "expa", "gst"),
+  Theme   = c("Heat shock proteins",
+              "Late embryogenesis abundant (LEA) proteins",
+              "Dehydrins",
+              "Aquaporins",
+              "Peroxidases",
+              "Chloroplast / photosystem / chlorophyll",
+              "Chitinase / pathogenesis-related",
+              "Expansins (cell-wall loosening)",
+              "Glutathione-related (e.g. GST)"),
+  Pattern = c("heat shock",
+              "late embryogenesis",
+              "dehydrin",
+              "aquaporin",
+              "peroxidase",
+              "chloroplast|photosystem|chlorophyll",
+              "chitinase|pathogenesis",
+              "expansin",
+              "glutathione"),
+  stringsAsFactors = FALSE
+)
+
+count_theme <- function(pat) {
+  hit <- grepl(pat, ann$Description, ignore.case = TRUE)
+  c(Total = sum(hit), Up = sum(hit & ann$logFC > 0), Down = sum(hit & ann$logFC < 0))
+}
+
+theme_counts <- t(sapply(themes$Pattern, count_theme))
+theme_tbl <- data.frame(
+  Key   = themes$Key,
+  Theme = themes$Theme,
+  Total = as.integer(theme_counts[, "Total"]),
+  Up    = as.integer(theme_counts[, "Up"]),
+  Down  = as.integer(theme_counts[, "Down"]),
+  stringsAsFactors = FALSE
+)
+
+get_n <- function(key, col) theme_tbl[[col]][theme_tbl$Key == key]
+
+# ---- Sample-level summaries ----
+grp <- setNames(meta$condition, meta$geo_accession)
+
+sample_stats <- data.frame(
+  Sample = colnames(expr),
+  Group  = unname(grp[colnames(expr)]),
+  Mean   = round(colMeans(expr), 3),
+  Median = round(apply(expr, 2, median), 3),
+  SD     = round(apply(expr, 2, sd), 3),
+  Min    = round(apply(expr, 2, min), 2),
+  Max    = round(apply(expr, 2, max), 2),
+  stringsAsFactors = FALSE
+)
+
+sd_ctrl  <- range(sample_stats$SD[sample_stats$Group == "Control"])
+sd_dr    <- range(sample_stats$SD[sample_stats$Group == "Drought"])
+sd_ctrl_txt <- sprintf("%.2f to %.2f", sd_ctrl[1], sd_ctrl[2])
+sd_dr_txt   <- sprintf("%.2f to %.2f", sd_dr[1], sd_dr[2])
+
+# ---- Package versions ----
+pv <- function(x) tryCatch(as.character(packageVersion(x)), error = function(e) "not found")
 ```
 
-## Including Plots
+<div class="hero" id="top">
 
-You can also embed plots, for example:
+<div class="eyebrow">Bioinformatics &middot; Differential Gene Expression Analysis</div>
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+<h1 class="hero-title">Uncovering the Molecular Response of Rice to Drought Stress</h1>
+
+<div class="hero-sub">A limma-based differential gene expression analysis of shoot tissue from <em>Oryza sativa</em> (cv. Nipponbare) under well-watered and drought conditions, using NCBI GEO dataset GSE115826.</div>
+
+<div class="hero-meta">
+<div><div class="label">Student</div><div class="value">Ayodya Ekanayake<br>2021/ICT/61</div></div>
+<div><div class="label">Programme</div><div class="value">BSc (Hons) Information Technology</div></div>
+<div><div class="label">Institution</div><div class="value">University of Vavuniya, Sri Lanka</div></div>
+<div><div class="label">Date</div><div class="value">`r format(Sys.Date(), "%d %B %Y")`</div></div>
+</div>
+
+</div>
+
+## Research Overview {#overview}
+
+<div class="panel">
+
+<div class="panel-title">Research question</div>
+
+Which genes in rice shoots change their expression when seedlings are exposed to drought for three days, and in which direction (up or down) do they change?
+
+</div>
+
+<div class="panel">
+
+<div class="panel-title">Study at a glance</div>
+
+<div class="fact-grid">
+<div class="fact"><span class="k">GEO accession</span><span class="v">GSE115826</span></div>
+<div class="fact"><span class="k">Organism</span><span class="v"><em>Oryza sativa</em> (cv. Nipponbare)</span></div>
+<div class="fact"><span class="k">Microarray platform</span><span class="v">GPL6864 (Agilent 4x44K)</span></div>
+<div class="fact"><span class="k">Tissue / time point</span><span class="v">Shoot / day 3</span></div>
+<div class="fact"><span class="k">Samples</span><span class="v">`r n_samples` (`r n_ctrl` control, `r n_drought` drought)</span></div>
+<div class="fact"><span class="k">Comparison</span><span class="v">Drought &minus; Control</span></div>
+<div class="fact"><span class="k">Statistical method</span><span class="v">limma + empirical Bayes</span></div>
+<div class="fact"><span class="k">Significance rule</span><span class="v">adj. P &lt; 0.05 and |log2FC| &ge; 1</span></div>
+</div>
+
+</div>
+
+## Executive Summary {#executive-summary}
+
+<div class="card-grid">
+
+<div class="card">
+<div class="num">`r n_samples`</div>
+<div class="lab">Microarrays</div>
+<div class="sub">`r n_ctrl` well-watered control and `r n_drought` drought-stressed shoot samples.</div>
+</div>
+
+<div class="card">
+<div class="num">`r fmt(n_tested)`</div>
+<div class="lab">Probes analysed</div>
+<div class="sub">`r fmt(n_orig)` probes on the array; `r fmt(n_removed)` zero-variance probes removed.</div>
+</div>
+
+<div class="card up">
+<div class="num">`r fmt(n_up)`</div>
+<div class="lab">Upregulated probes</div>
+<div class="sub">Higher under drought (adj. P &lt; 0.05, log2FC &ge; 1).</div>
+</div>
+
+<div class="card down">
+<div class="num">`r fmt(n_down)`</div>
+<div class="lab">Downregulated probes</div>
+<div class="sub">Lower under drought (adj. P &lt; 0.05, log2FC &le; &minus;1).</div>
+</div>
+
+</div>
+
+<div class="panel">
+
+<div class="panel-title">Key findings</div>
+
+- **A large transcriptional response.** Of `r fmt(n_tested)` probes tested, **`r fmt(n_sig)` (`r pct(pct_sig)`)** passed both the statistical (BH-adjusted P < 0.05) and the effect-size (|log2FC| &ge; 1) criteria. `r fmt(n_up)` probes (`r pct(pct_up)`) were upregulated and `r fmt(n_down)` (`r pct(pct_down)`) were downregulated under drought.
+- **Strong effect sizes.** `r fmt(n_lfc2)` significant probes changed by at least four-fold (|log2FC| &ge; 2) and `r fmt(n_lfc3)` by at least eight-fold (|log2FC| &ge; 3). The largest increase was log2FC = `r round(max_up, 2)` and the largest decrease was log2FC = `r round(max_down, 2)`.
+- **Clear separation of the two conditions.** Exploratory analysis (MDS plot and heatmap) shows that all control replicates group together and all drought replicates group together, with no outlying sample.
+- **Recognisable drought biology.** Among significant probes, annotations for late embryogenesis abundant (LEA) proteins (`r get_n("lea", "Up")` up, `r get_n("lea", "Down")` down), dehydrins (`r get_n("dehy", "Up")` up, `r get_n("dehy", "Down")` down) and heat shock proteins (`r get_n("hsp", "Up")` up, `r get_n("hsp", "Down")` down) are mainly induced, whereas chloroplast / photosystem-related probes (`r get_n("chloro", "Up")` up, `r get_n("chloro", "Down")` down), peroxidases (`r get_n("perox", "Up")` up, `r get_n("perox", "Down")` down), expansins (`r get_n("expa", "Up")` up, `r get_n("expa", "Down")` down) and aquaporins (`r get_n("aqp", "Up")` up, `r get_n("aqp", "Down")` down) are mainly repressed.
+- **Interpretation note.** The proportion of probes that respond is unusually high, and the study design (four versus four arrays, common-reference microarray) has limitations that are discussed in Section 10. The shortlist of probes with |log2FC| &ge; 2 is the most conservative set for follow-up.
+
+</div>
+
+<div class="toc-panel" id="toc">
+
+## Table of Contents {#table-of-contents}
+
+<ol class="toc-list">
+<li><a href="#introduction"><span class="n">1</span><span>Introduction<span class="d">Background and motivation</span></span></a></li>
+<li><a href="#research-objectives"><span class="n">2</span><span>Research Objectives<span class="d">Aims of the analysis</span></span></a></li>
+<li><a href="#dataset-description"><span class="n">3</span><span>Dataset Description<span class="d">GSE115826, samples and platform</span></span></a></li>
+<li><a href="#methodology"><span class="n">4</span><span>Methodology<span class="d">Preprocessing, limma model, thresholds</span></span></a></li>
+<li><a href="#exploratory-data-analysis"><span class="n">5</span><span>Exploratory Data Analysis<span class="d">Quality checks, boxplot, MDS</span></span></a></li>
+<li><a href="#differential-expression-analysis"><span class="n">6</span><span>Differential Expression Analysis<span class="d">Design, contrast and model summary</span></span></a></li>
+<li><a href="#results"><span class="n">7</span><span>Results<span class="d">Counts, top probes, functional themes</span></span></a></li>
+<li><a href="#visualizations"><span class="n">8</span><span>Visualizations<span class="d">Volcano plot and heatmap</span></span></a></li>
+<li><a href="#discussion"><span class="n">9</span><span>Discussion<span class="d">Biological interpretation</span></span></a></li>
+<li><a href="#limitations"><span class="n">10</span><span>Limitations<span class="d">Design and analysis caveats</span></span></a></li>
+<li><a href="#conclusion"><span class="n">11</span><span>Conclusion<span class="d">Summary and future work</span></span></a></li>
+<li><a href="#references"><span class="n">12</span><span>References<span class="d">Sources and software</span></span></a></li>
+<li><a href="#appendix"><span class="n">A</span><span>Appendix<span class="d">Output files, software, top-25 table</span></span></a></li>
+</ol>
+
+</div>
+
+## 1. Introduction {#introduction}
+
+Rice (*Oryza sativa*) is a staple food for more than half of the world's population, and it is also one of the most water-demanding cereal crops. Drought is therefore one of the main environmental factors limiting rice yield. When a rice plant loses water, it adjusts the activity of thousands of genes: protective proteins accumulate, growth-related and photosynthesis-related processes are slowed, and signalling and transcription-factor networks are reprogrammed (Gupta et al., 2020; Todaka et al., 2015).
+
+Microarrays measure the abundance of thousands of transcripts at the same time, so comparing stressed and unstressed plants makes it possible to see which genes are switched on or off. Public repositories such as the NCBI Gene Expression Omnibus (GEO) make these data freely available for re-analysis (Edgar et al., 2002).
+
+This project re-analyses the public GEO dataset **GSE115826** ("Rice drought treatment"), in which shoots of two-week-old Nipponbare seedlings were sampled after three days of drought or well-watered treatment. Differential expression was tested with the **limma** package in R (Ritchie et al., 2015), and the results were visualised and annotated using the GPL6864 platform description.
+
+## 2. Research Objectives {#research-objectives}
+
+<div class="panel">
+
+The overall aim is to identify the molecular response of rice shoots to drought stress using differential gene expression analysis. The specific objectives are:
+
+1. To obtain the GSE115826 dataset from NCBI GEO and verify its quality (missing values, infinite values, duplicate probes and zero-variance probes).
+2. To assign each sample correctly to the **Control** or **Drought** group from its metadata.
+3. To explore the data with a sample-level summary, an expression boxplot and an MDS plot.
+4. To test every probe for differential expression between drought and control using limma with empirical Bayes moderation and Benjamini-Hochberg correction.
+5. To identify significant, upregulated and downregulated probes using adjusted P < 0.05 and |log2FC| &ge; 1.
+6. To visualise the results with a volcano plot and a heatmap, and to annotate significant probes with the GPL6864 platform information.
+7. To interpret the main expression patterns in relation to known drought-response mechanisms.
+
+</div>
+
+## 3. Dataset Description {#dataset-description}
+
+### 3.1 Study design
+
+<div class="panel">
+
+<div class="fact-grid">
+<div class="fact"><span class="k">Series title</span><span class="v">Rice drought treatment</span></div>
+<div class="fact"><span class="k">GEO accession</span><span class="v">GSE115826</span></div>
+<div class="fact"><span class="k">Organism / cultivar</span><span class="v"><em>Oryza sativa</em> / Nipponbare</span></div>
+<div class="fact"><span class="k">Plant age at treatment</span><span class="v">2 weeks</span></div>
+<div class="fact"><span class="k">Tissue</span><span class="v">Seedling shoot</span></div>
+<div class="fact"><span class="k">Treatment duration</span><span class="v">3 days</span></div>
+<div class="fact"><span class="k">Platform</span><span class="v">GPL6864, Agilent-015241 Rice 4x44K</span></div>
+<div class="fact"><span class="k">Probes on the array</span><span class="v">`r fmt(n_orig)`</span></div>
+<div class="fact"><span class="k">Data type</span><span class="v">Two-colour microarray (Cy5 / Cy3)</span></div>
+<div class="fact"><span class="k">Feature extraction</span><span class="v">Agilent FE v11.5.1.1</span></div>
+<div class="fact"><span class="k">Submitting laboratory</span><span class="v">NARO, Tsukuba, Japan</span></div>
+<div class="fact"><span class="k">Associated PubMed ID</span><span class="v">33737547</span></div>
+</div>
+
+</div>
+
+Every array compares one rice shoot sample (labelled with Cy5) against a **common well-watered reference** (labelled with Cy3). The values deposited in the GEO series matrix are the Agilent *LogRatio* of each probe. Four arrays are well-watered controls and four arrays are drought-stressed samples.
+
+### 3.2 Samples
+
+```{r sample-table, results='asis'}
+sample_tbl <- data.frame(
+  `GEO accession` = meta$geo_accession,
+  `Sample title`  = meta$title,
+  Condition       = meta$condition,
+  Treatment       = meta$`treatment:ch1`,
+  `Raw data file` = basename(meta$supplementary_file),
+  check.names = FALSE,
+  stringsAsFactors = FALSE
+)
+html_table(sample_tbl)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+### 3.3 Data quality checks
+
+The expression matrix was checked before analysis. No missing, infinite or duplicated probe values were present, so no probe had to be removed for these reasons. Probes with **zero variance** across all eight arrays (for example Agilent control features whose ratio is exactly zero everywhere) carry no information for a linear model and were removed.
+
+| Check | Result |
+|:--|--:|
+| Samples | `r n_samples` |
+| Probes on the original series matrix | `r fmt(n_orig)` |
+| Missing values | 0 |
+| Infinite values | 0 |
+| Duplicate probe IDs | 0 |
+| Zero-variance probes removed | `r fmt(n_removed)` |
+| **Probes retained for analysis** | **`r fmt(n_tested)`** |
+
+## 4. Methodology {#methodology}
+
+### 4.1 Analytical workflow
+
+<div class="workflow">
+<div class="step"><div class="st">Data acquisition</div><div class="sd">GSE115826 series matrix loaded with GEOquery.</div></div>
+<div class="step"><div class="st">Group assignment</div><div class="sd">Control and Drought labels taken from sample titles.</div></div>
+<div class="step"><div class="st">Quality control</div><div class="sd">Missing, infinite, duplicate and zero-variance checks.</div></div>
+<div class="step"><div class="st">Scale conversion</div><div class="sd">log10 ratios converted to log2 ratios.</div></div>
+<div class="step"><div class="st">Exploration</div><div class="sd">Sample summary, boxplot and MDS plot.</div></div>
+<div class="step"><div class="st">Linear model</div><div class="sd">limma lmFit, Drought &minus; Control contrast, eBayes.</div></div>
+<div class="step"><div class="st">Thresholding</div><div class="sd">BH adj. P &lt; 0.05 and |log2FC| &ge; 1.</div></div>
+<div class="step"><div class="st">Visualisation and annotation</div><div class="sd">Volcano plot, heatmap and GPL6864 annotation.</div></div>
+</div>
+
+### 4.2 Data loading and group assignment
+
+The series matrix was loaded with the `GEOquery` package (Davis & Meltzer, 2007) into an `ExpressionSet`, from which the expression matrix, sample metadata and probe information were extracted. Samples were assigned to **Control** or **Drought** using the word "drought" in the sample title; the assignment gave `r n_ctrl` control and `r n_drought` drought arrays, as expected from the study design.
+
+### 4.3 Preprocessing and log scale
+
+Probes with missing or non-finite values, and probes with zero variance, were removed (Section 3.3).
+
+The GEO values are the Agilent Feature Extraction **LogRatio**, which is defined as the **log10** ratio of the red (Cy5) to the green (Cy3) processed signal. This was checked directly on the raw Feature Extraction file of sample GSM3190931: the deposited LogRatio equals log10(rProcessedSignal / gProcessedSignal) for nearly all probes (median absolute difference below 1e-7), and it does not match a log2 ratio. The values were therefore multiplied by log2(10) &asymp; 3.32 so that all fold changes in this report are on the **log2** scale (a log2FC of 1 means a two-fold change, 2 means four-fold, and so on). No other transformation or normalisation was applied beyond the background subtraction already done by the Agilent software.
+
+### 4.4 Differential expression with limma
+
+A linear model with one mean per group (no intercept) was fitted to every probe, the **Drought &minus; Control** contrast was extracted, and the standard errors were moderated with empirical Bayes (Smyth, 2004; Ritchie et al., 2015).
+
+```
+design   <- model.matrix(~ 0 + condition)        # columns: Control, Drought
+contrast <- makeContrasts(Drought - Control, levels = design)
+fit      <- lmFit(clean_expression, design)
+fit2     <- eBayes(contrasts.fit(fit, contrast))
+results  <- topTable(fit2, coef = 1, number = Inf, adjust.method = "BH", sort.by = "P")
+```
+
+A **positive** log2FC means higher expression under drought; a **negative** log2FC means lower expression under drought. P-values were adjusted for multiple testing across all probes with the Benjamini-Hochberg false discovery rate procedure (Benjamini & Hochberg, 1995).
+
+### 4.5 Significance criteria
+
+| Category | Rule |
+|:--|:--|
+| Significant | adj. P < 0.05 **and** \|log2FC\| &ge; 1 |
+| Upregulated | significant and log2FC > 0 |
+| Downregulated | significant and log2FC < 0 |
+| Not significant | all other probes |
+
+### 4.6 Visualisation and annotation
+
+The volcano plot (`ggplot2`; Wickham, 2016) shows log2FC against &minus;log10 adjusted P for every probe. The heatmap (`pheatmap`; Kolde) shows the 50 most variable probes, with each row scaled to its own mean. Significant probes were joined to the GPL6864 annotation table by probe ID to obtain the locus identifier and the functional description.
+
+## 5. Exploratory Data Analysis {#exploratory-data-analysis}
+
+### 5.1 Sample distribution
+
+The design is balanced, with `r n_ctrl` control and `r n_drought` drought arrays.
+
+```{r fig-sample-distribution, results='asis'}
+show_fig("sample_distribution.png", "Figure 1. Number of samples in each experimental group.")
+```
+
+### 5.2 Expression distribution per sample
+
+```{r sample-stats, results='asis'}
+html_table(sample_stats)
+```
+
+The table shows the log2 ratio of each array after preprocessing. All arrays are centred close to zero. The four control arrays have a narrow spread (standard deviation `r sd_ctrl_txt`), as expected because they compare well-watered plants with a well-watered reference. The four drought arrays have a much wider spread (standard deviation `r sd_dr_txt`) and more extreme values, which reflects the strong transcriptional response to drought. The four arrays within each group are very similar to each other.
+
+```{r fig-boxplot, results='asis'}
+show_fig("expression_boxplot.png", "Figure 2. Distribution of log2 expression ratios in each sample (blue: control, red: drought).")
+```
+
+### 5.3 Multidimensional scaling (MDS)
+
+The MDS plot places samples according to the expression differences between them. Samples that respond similarly are close together.
+
+```{r fig-mds, results='asis'}
+show_fig("mds_plot.png", "Figure 3. MDS plot of the eight arrays. Control and drought samples form two separate clusters.")
+```
+
+The control replicates form one tight cluster and the drought replicates form a second, clearly separated cluster. The first dimension separates the two conditions, which confirms that the treatment is the main source of variation in the data and that there are no outlier arrays.
+
+## 6. Differential Expression Analysis {#differential-expression-analysis}
+
+<div class="panel">
+
+<div class="panel-title">Model summary</div>
+
+<div class="fact-grid">
+<div class="fact"><span class="k">Probes tested</span><span class="v">`r fmt(n_tested)`</span></div>
+<div class="fact"><span class="k">Samples in the model</span><span class="v">`r n_samples` (`r n_ctrl` vs `r n_drought`)</span></div>
+<div class="fact"><span class="k">Contrast</span><span class="v">Drought &minus; Control</span></div>
+<div class="fact"><span class="k">Moderation</span><span class="v">Empirical Bayes (eBayes)</span></div>
+<div class="fact"><span class="k">Multiple-testing correction</span><span class="v">Benjamini-Hochberg (FDR)</span></div>
+<div class="fact"><span class="k">Probes with adj. P &lt; 0.05</span><span class="v">`r fmt(n_fdr)` (`r pct(pct_fdr)`)</span></div>
+<div class="fact"><span class="k">Smallest adjusted P-value</span><span class="v">`r fmt_sci(min(all_de$`adj.P.Val`))`</span></div>
+<div class="fact"><span class="k">Probes passing both thresholds</span><span class="v">`r fmt(n_sig)` (`r pct(pct_sig)`)</span></div>
+</div>
+
+</div>
+
+Of the `r fmt(n_tested)` probes tested, `r fmt(n_fdr)` had an adjusted P-value below 0.05. Requiring in addition an absolute log2 fold change of at least 1 (a two-fold change) reduced this to `r fmt(n_sig)` probes. Using the fold-change cut-off removes probes that are statistically significant but change only slightly.
+
+## 7. Results {#results}
+
+### 7.1 Overview of differentially expressed probes
+
+```{r results-summary, results='asis'}
+summary_tbl <- data.frame(
+  Category = c("Probes analysed",
+               "Adjusted P < 0.05",
+               "Significant (adj. P < 0.05 and |log2FC| >= 1)",
+               "   Upregulated under drought",
+               "   Downregulated under drought",
+               "Significant with |log2FC| >= 2 (four-fold or more)",
+               "Significant with |log2FC| >= 3 (eight-fold or more)"),
+  Probes = c(fmt(n_tested), fmt(n_fdr), fmt(n_sig), fmt(n_up), fmt(n_down), fmt(n_lfc2), fmt(n_lfc3)),
+  `Share` = c("100.0%",
+              pct(pct_fdr),
+              pct(pct_sig),
+              paste0(pct(100 * n_up / n_tested), " of tested"),
+              paste0(pct(100 * n_down / n_tested), " of tested"),
+              pct(100 * n_lfc2 / n_tested),
+              pct(100 * n_lfc3 / n_tested)),
+  check.names = FALSE,
+  stringsAsFactors = FALSE
+)
+html_table(summary_tbl)
+```
+
+The median log2FC of the upregulated probes is `r round(median(up$logFC), 2)` and the median log2FC of the downregulated probes is `r round(median(down$logFC), 2)`. Downregulated probes therefore tend to show slightly larger absolute changes, while upregulated probes are somewhat more numerous.
+
+### 7.2 Most significant probes
+
+The ten probes with the smallest P-values. Several probes share the same adjusted P-value because the adjustment is monotone across thousands of tests.
+
+```{r top-significant, results='asis'}
+html_table(make_top(ann_sig, 10))
+```
+
+### 7.3 Strongest upregulated probes
+
+<span class="pill up">Higher under drought</span>
+
+```{r top-up, results='asis'}
+html_table(make_top(ann_up, 10))
+```
+
+### 7.4 Strongest downregulated probes
+
+<span class="pill down">Lower under drought</span>
+
+```{r top-down, results='asis'}
+html_table(make_top(ann_down, 10))
+```
+
+### 7.5 Functional themes among significant probes
+
+To summarise the biology without a formal enrichment test, the platform descriptions of the `r fmt(n_sig)` significant probes were searched for keywords that are linked to drought responses. The table gives the number of significant probes whose description contains each keyword.
+
+```{r theme-table, results='asis'}
+theme_show <- data.frame(
+  `Functional theme` = theme_tbl$Theme,
+  `Significant probes` = theme_tbl$Total,
+  Upregulated = theme_tbl$Up,
+  Downregulated = theme_tbl$Down,
+  check.names = FALSE,
+  stringsAsFactors = FALSE
+)
+html_table(theme_show)
+```
+
+<div class="callout">
+
+**Reading this table.** These counts come from annotation text, not from a statistical enrichment test, so they describe tendencies rather than proven pathway effects. About `r pct(pct_unknown, 0)` of the significant probes are annotated only as hypothetical, conserved hypothetical or unknown-function proteins, so a large part of the response cannot be interpreted from the current annotation.
+
+</div>
+
+## 8. Visualizations {#visualizations}
+
+### 8.1 Volcano plot
+
+```{r fig-volcano, results='asis'}
+show_fig("volcano_plot.png", "Figure 4. Volcano plot of Drought versus Control. Dashed lines mark |log2FC| = 1 and adjusted P = 0.05.")
+```
+
+Each point is one probe. Probes to the right are higher under drought and probes to the left are lower. Points above the horizontal dashed line (adjusted P = 0.05) and outside the vertical dashed lines (|log2FC| = 1) are the `r fmt(n_sig)` significant probes. The two arms of the plot are broad and nearly symmetric, showing that drought both activates and represses a very large number of genes.
+
+### 8.2 Expression heatmap
+
+```{r fig-heatmap, results='asis'}
+show_fig("expression_heatmap.png", "Figure 5. Heatmap of the 50 most variable probes (row-scaled). Colour shows expression relative to the probe mean.")
+```
+
+The heatmap shows the 50 most variable probes across the eight arrays. The samples split into two clusters that correspond exactly to the control and drought groups, and the probes split into two blocks with opposite behaviour: one block is high in control and low in drought, the other is low in control and high in drought. The replicates within each group have very similar patterns, which indicates good reproducibility.
+
+## 9. Discussion {#discussion}
+
+**A strong and reproducible drought signature.** Three days of drought changed the expression of almost half of the probes analysed (`r pct(pct_sig)`), and the response was consistent between replicates: the MDS plot, the heatmap and the sample summaries all show two clean groups. About `r pct(100 * n_lfc2 / n_sig, 0)` of the significant probes changed by four-fold or more, so the response is not driven by small changes only.
+
+**Induction of protective proteins.** The strongest upregulated probes include a small hydrophobic protein (Os05g0122700, log2FC `r round(max_up, 2)`), a class III chitinase homologue (Os11g0700900), isocitrate lyase (Os07g0529000, represented by two probes) and Cor14b (Os04g0610600), a cold-regulated protein that is also associated with abiotic stress. The 16.9 kDa class I heat shock protein (Os01g0136000) is among the most significant probes overall. Across all significant probes, LEA proteins and dehydrins, which protect cells during dehydration, appear almost exclusively on the upregulated side, and heat shock proteins are mostly upregulated (`r get_n("hsp", "Up")` of `r get_n("hsp", "Total")`). This matches the well-known role of LEA proteins, dehydrins and chaperones in cellular protection under water deficit (Todaka et al., 2015).
+
+**Repression of growth- and photosynthesis-related genes.** Chloroplast, photosystem and chlorophyll-related probes are predominantly downregulated (`r get_n("chloro", "Down")` of `r get_n("chloro", "Total")`), as are expansins (`r get_n("expa", "Down")` of `r get_n("expa", "Total")`), which are involved in cell-wall loosening and growth. A reduction of photosynthetic and growth-related activity is a typical response of plants that conserve resources under water shortage (Gupta et al., 2020). Aquaporins, water-channel proteins, appear only on the downregulated side (`r get_n("aqp", "Down")` probes), in line with reduced membrane water permeability during drought. Peroxidases are mostly downregulated (`r get_n("perox", "Down")` of `r get_n("perox", "Total")`), while glutathione-related and chitinase / pathogenesis-related probes are mostly upregulated, suggesting that stress-defence systems are activated while some cell-wall and oxidative-metabolism functions are switched down.
+
+**Other strongly repressed genes.** The strongest downregulated probes include a plant disease resistance response protein (Os07g0637700), male sterility proteins (for example MS5, Os09g0538500), a laccase (Os05g0458500), harpin-induced 1 domain proteins (Os02g0538700, two probes) and OsNramp1 (Os07g0257200). Some of these may reflect reduced growth and developmental activity, but their specific roles in drought should be tested experimentally.
+
+**Interpretation of the size of the response.** The fraction of responding probes is high. A strong stress at day 3 is one explanation. In addition, the common-reference design means that the control group acts as a "no change" baseline, which makes the Drought &minus; Control contrast sensitive to any consistent shift in the drought arrays. For these reasons, probes with large fold changes and very small adjusted P-values (for example |log2FC| &ge; 2, `r fmt(n_lfc2)` probes) should be given priority when selecting candidates.
+
+## 10. Limitations {#limitations}
+
+<div class="callout warn">
+
+- **Small sample size.** Only four biological replicates per group were available, and the experiment covers one cultivar (Nipponbare), one tissue (shoot) and a single time point (day 3). The results cannot show how the response changes over time or in other genotypes.
+- **Common-reference design.** Every array compares the sample (Cy5) with a well-watered reference (Cy3) and there are no dye-swap arrays. Dye-specific bias cannot be separated from treatment effects, and the control arrays measure well-watered versus well-watered ratios.
+- **Unequal variability between groups.** The control arrays have a much smaller spread of log ratios (SD `r sd_ctrl_txt`) than the drought arrays (SD `r sd_dr_txt`). limma estimates one residual variance per probe across both groups, so this difference may affect the P-values.
+- **Limited normalisation.** The analysis uses the background-subtracted Agilent LogRatio values as deposited in GEO and applies no additional within-array or between-array normalisation.
+- **Probe-level results.** Results are reported per probe, not per gene. Several probes can represent the same locus, so the number of significant probes is larger than the number of distinct genes.
+- **Annotation and interpretation.** About `r pct(pct_unknown, 0)` of the significant probes have only a hypothetical or unknown-function annotation, and the functional themes in Section 7.5 come from keyword counts rather than a formal Gene Ontology or pathway enrichment analysis.
+- **No experimental validation.** The findings have not been confirmed with an independent method such as qRT-PCR.
+
+</div>
+
+## 11. Conclusion {#conclusion}
+
+This study re-analysed the GEO dataset GSE115826 to describe the response of rice shoots to three days of drought. After quality control and conversion of the Agilent log10 ratios to the log2 scale, `r fmt(n_tested)` probes were tested with limma. A total of **`r fmt(n_sig)` probes** were significantly differentially expressed (adjusted P < 0.05 and |log2FC| &ge; 1), of which **`r fmt(n_up)` were upregulated** and **`r fmt(n_down)` were downregulated** under drought. The MDS plot and heatmap show a clear and reproducible separation of control and drought samples.
+
+Upregulated probes were enriched in annotations for protective proteins such as LEA proteins, dehydrins and heat shock proteins, whereas downregulated probes were enriched in chloroplast, photosynthesis-related, cell-wall expansion and aquaporin functions. These patterns agree with established knowledge of drought responses in plants.
+
+**Future work.** The probe lists can be extended by (i) formal Gene Ontology and pathway enrichment analysis, (ii) mapping probes to unique gene loci, (iii) comparison with other drought datasets of rice, (iv) a sensitivity analysis with additional normalisation, and (v) qRT-PCR validation of the top candidates, for example probes with |log2FC| &ge; 3 (`r fmt(n_lfc3)` probes).
+
+## 12. References {#references}
+
+<div class="panel reference-list">
+
+Benjamini, Y. and Hochberg, Y. (1995). Controlling the false discovery rate: a practical and powerful approach to multiple testing. *Journal of the Royal Statistical Society: Series B*, 57(1), 289-300.
+
+Davis, S. and Meltzer, P. S. (2007). GEOquery: a bridge between the Gene Expression Omnibus (GEO) and BioConductor. *Bioinformatics*, 23(14), 1846-1847.
+
+Edgar, R., Domrachev, M. and Lash, A. E. (2002). Gene Expression Omnibus: NCBI gene expression and hybridization array data repository. *Nucleic Acids Research*, 30(1), 207-210.
+
+Gupta, A., Rico-Medina, A. and Cano-Delgado, A. I. (2020). The physiology of plant responses to drought. *Science*, 368(6488), 266-269.
+
+Kolde, R. *pheatmap: Pretty Heatmaps*. R package.
+
+NCBI Gene Expression Omnibus. Series GSE115826, "Rice drought treatment" (submitted 14 June 2018; contributors D. Ogawa and Y. Habu; PubMed ID 33737547) and platform GPL6864, Agilent-015241 Rice Gene Expression 4x44K Microarray. https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE115826
+
+R Core Team. *R: A Language and Environment for Statistical Computing*. R Foundation for Statistical Computing, Vienna, Austria.
+
+Ritchie, M. E., Phipson, B., Wu, D., Hu, Y., Law, C. W., Shi, W. and Smyth, G. K. (2015). limma powers differential expression analyses for RNA-sequencing and microarray studies. *Nucleic Acids Research*, 43(7), e47.
+
+Smyth, G. K. (2004). Linear models and empirical Bayes methods for assessing differential expression in microarray experiments. *Statistical Applications in Genetics and Molecular Biology*, 3(1), Article 3.
+
+Todaka, D., Shinozaki, K. and Yamaguchi-Shinozaki, K. (2015). Recent advances in the dissection of drought-stress regulatory networks and strategies for development of drought-tolerant transgenic rice plants. *Frontiers in Plant Science*, 6, 84.
+
+Wickham, H. (2016). *ggplot2: Elegant Graphics for Data Analysis*. Springer-Verlag, New York.
+
+Xie, Y., Allaire, J. J. and Grolemund, G. (2018). *R Markdown: The Definitive Guide*. Chapman and Hall/CRC.
+
+</div>
+
+## Appendix {#appendix}
+
+### A. Output files
+
+| File | Content |
+|:--|:--|
+| `results/all_differential_expression.csv` | limma results for all tested probes |
+| `results/significant_probes.csv` | probes with adj. P < 0.05 and \|log2FC\| &ge; 1 |
+| `results/upregulated_probes.csv` | significant probes with log2FC > 0 |
+| `results/downregulated_probes.csv` | significant probes with log2FC < 0 |
+| `results/annotated_results.csv` | significant probes joined with GPL6864 annotation |
+| `results/clean_expression_matrix.csv` | preprocessed log2 expression matrix |
+| `results/sample_metadata.csv` | sample information including the assigned condition |
+| `figures/` | sample_distribution, expression_boxplot, mds_plot, volcano_plot, expression_heatmap (PNG) |
+
+### B. Software environment
+
+```{r software, results='asis'}
+sw <- data.frame(
+  Software = c("R", "GEOquery", "limma", "Biobase", "ggplot2", "pheatmap", "knitr", "rmarkdown"),
+  Version  = c(paste(R.version$major, R.version$minor, sep = "."),
+               pv("GEOquery"), pv("limma"), pv("Biobase"), pv("ggplot2"),
+               pv("pheatmap"), pv("knitr"), pv("rmarkdown")),
+  stringsAsFactors = FALSE
+)
+html_table(sw)
+```
+
+### C. How to reproduce the analysis
+
+1. Open `Rice_Drought_ICA3.Rproj` in RStudio.
+2. Run `code/analysis.R` from top to bottom. It writes the CSV files to `results/` and the five figures to `figures/`.
+3. Open `reports/final_report.Rmd` and press **Knit** (HTML). The report reads the files in `results/` and `figures/`, so all numbers and plots come directly from the analysis.
+
+### D. Top 25 significant probes
+
+```{r top25, results='asis'}
+html_table(make_top(ann_sig, 25))
+```
+
+<div class="footer">
+
+<strong>Rice Drought Stress Analysis</strong> &middot; Differential gene expression analysis of GSE115826<br>
+Ayodya Ekanayake &middot; 2021/ICT/61 &middot; BSc (Hons) Information Technology<br>
+Department of Physical Science, Faculty of Applied Science, University of Vavuniya<br>
+<a href="#top" style="color:#8ea6c3;">Back to top</a>
+
+</div>
