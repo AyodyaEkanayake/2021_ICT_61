@@ -361,19 +361,19 @@ Drought Stress Using Differential Gene Expression Analysis</h3>
 
 <style>
 :root {
---navy-900: #14213a;
---navy-800: #1b2c4b;
---navy-700: #26405f;
---navy-500: #46688f;
---navy-300: #8ea6c3;
---navy-100: #e6ecf4;
---grey-50: #f6f8fb;
---grey-100: #eef1f6;
---grey-200: #dfe5ee;
---grey-500: #6b778a;
---text: #243142;
---up: #b4443f;
---down: #2f5d8a;
+--navy-900: #111111;
+--navy-800: #1e1e1e;
+--navy-700: #333333;
+--navy-500: #666666;
+--navy-300: #a8a8a8;
+--navy-100: #ebebeb;
+--grey-50: #f7f7f7;
+--grey-100: #efefef;
+--grey-200: #dcdcdc;
+--grey-500: #707070;
+--text: #222222;
+--up: #1a1a1a;
+--down: #7a7a7a;
 --white: #ffffff;
 }
 html { scroll-behavior: smooth; }
@@ -398,7 +398,7 @@ color: var(--white);
 border-radius: 18px;
 padding: 58px 54px 46px;
 margin: 8px 0 28px;
-box-shadow: 0 14px 34px rgba(20,33,58,.28);
+box-shadow: 0 14px 34px rgba(0,0,0,.28);
 }
 .hero .eyebrow {
 display: inline-block;
@@ -406,7 +406,7 @@ font-size: 12.5px;
 letter-spacing: 2px;
 text-transform: uppercase;
 color: var(--navy-300);
-border: 1px solid rgba(142,166,195,.55);
+border: 1px solid rgba(190,190,190,.6);
 padding: 5px 14px;
 border-radius: 30px;
 margin-bottom: 22px;
@@ -423,7 +423,7 @@ padding: 0;
 .hero .hero-sub {
 font-size: 18px;
 line-height: 1.55;
-color: #cfd9e8;
+color: #d6d6d6;
 max-width: 820px;
 margin-bottom: 34px;
 }
@@ -482,7 +482,7 @@ border: 1px solid var(--grey-200);
 border-radius: 14px;
 padding: 26px 30px;
 margin: 18px 0 24px;
-box-shadow: 0 2px 10px rgba(20,33,58,.05);
+box-shadow: 0 2px 10px rgba(0,0,0,.05);
 }
 .panel > :last-child { margin-bottom: 0; }
 .panel-title {
@@ -505,7 +505,7 @@ border: 1px solid var(--grey-200);
 border-top: 4px solid var(--navy-700);
 border-radius: 12px;
 padding: 18px 20px;
-box-shadow: 0 2px 10px rgba(20,33,58,.05);
+box-shadow: 0 2px 10px rgba(0,0,0,.05);
 }
 .card.up { border-top-color: var(--up); }
 .card.down { border-top-color: var(--down); }
@@ -556,12 +556,12 @@ margin: 20px 0;
 }
 .callout > :last-child { margin-bottom: 0; }
 .callout.warn {
-background: #fbf3e4;
-border-left-color: #c58a1b;
+background: #f0f0f0;
+border-left-color: #555555;
 }
 .note-box {
-background: #fbf3e4;
-border: 1px dashed #c58a1b;
+background: #f0f0f0;
+border: 1px dashed #555555;
 border-radius: 8px;
 padding: 14px 18px;
 font-size: 14px;
@@ -688,7 +688,7 @@ border-radius: 14px;
 padding: 18px 18px 14px;
 margin: 20px 0 26px;
 text-align: center;
-box-shadow: 0 2px 10px rgba(20,33,58,.05);
+box-shadow: 0 2px 10px rgba(0,0,0,.05);
 }
 .figure-panel img {
 max-width: 100%;
@@ -708,8 +708,8 @@ border-radius: 20px;
 font-size: 12.5px;
 font-weight: 600;
 }
-.pill.up { background: #f7e3e2; color: var(--up); }
-.pill.down { background: #dfe9f4; color: var(--down); }
+.pill.up { background: #dcdcdc; color: #111111; }
+.pill.down { background: #f0f0f0; color: #444444; border: 1px solid #bdbdbd; }
 code {
 background: var(--grey-100);
 color: var(--navy-800);
@@ -727,7 +727,7 @@ margin-bottom: 11px;
 margin-top: 60px;
 padding: 26px 30px;
 background: var(--navy-900);
-color: #c4d0e2;
+color: #cfcfcf;
 border-radius: 14px;
 font-size: 13.5px;
 text-align: center;
@@ -3385,7 +3385,7 @@ Protein of unknown function DUF6 domain containing protein.
 expression analysis of GSE115826<br> Ayodya Ekanayake · 2021/ICT/61 ·
 BSc (Hons) Information Technology<br> Department of Physical Science,
 Faculty of Applied Science, University of Vavuniya<br>
-<a href="#top" style="color:#8ea6c3;">Back to top</a></p>
+<a href="#top" style="color:#bdbdbd;">Back to top</a></p>
 </div>
 </div>
 </div>
